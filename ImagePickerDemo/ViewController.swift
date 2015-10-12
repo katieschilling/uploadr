@@ -1,4 +1,5 @@
 import UIKit
+import Alamofire
 
 class ViewController: UIViewController,UIAlertViewDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate,UIPopoverControllerDelegate
 {
@@ -82,12 +83,50 @@ class ViewController: UIViewController,UIAlertViewDelegate,UIImagePickerControll
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject])
     {
         picker .dismissViewControllerAnimated(true, completion: nil)
-        imageView.image=info[UIImagePickerControllerOriginalImage] as? UIImage
+        let imageFile = info[UIImagePickerControllerOriginalImage] as? UIImage
+        imageView.image = imageFile
         imageView.contentMode = UIViewContentMode.ScaleAspectFit
+        
+        // upload image
+        let parameters = [
+            "filename": "besttestfile.png",
+            "encodedFile": convertImageToBase64(imageFile!)
+        ]
+        Alamofire.request(Method.POST, "http://account-home.netcredit.10.226.32.112.xip.io/attachments", parameters: parameters).responseJSON { response in
+            debugPrint(response)
+        }
+        
+        
+//        Alamofire.upload(Method.POST,"http://account-home.netcredit.10.226.32.112.xip.io/attachments",
+//            multipartFormData: { multipartFormData in
+//                multipartFormData.appendBodyPart(
+//                    data: imageFileJPG!,
+//                    name: "testfile.jpg"
+//                )
+//            }, encodingCompletion: { encodingResult in
+//                switch encodingResult {
+//                case .Success(let upload, _, _):
+//                    NSLog("Encoding Success!")
+//                    upload.responseJSON { _, _, JSON in
+//                        NSLog("Success Upload")
+//                        print(JSON)
+//                    }
+//                case .Failure(let encodingError):
+//                    print(encodingError)
+//                    NSLog("Encoding Failure")
+//                }
+//            }
+//            )
+        
     }
     func imagePickerControllerDidCancel(picker: UIImagePickerController)
     {
         picker.dismissViewControllerAnimated(true, completion: nil)
+    }
+    func convertImageToBase64(image: UIImage) -> String {
+        let imageDataJPG = UIImagePNGRepresentation(image)
+        let base64String = imageDataJPG!.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
+        return base64String
     }
     
     
